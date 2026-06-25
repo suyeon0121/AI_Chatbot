@@ -5,7 +5,7 @@ from core.security import get_current_user_email
 from pydantic import BaseModel
 from services.chat import ChatService
 
-router = APIRouter(prefix="/api/chat", tages=["Chat"])
+router = APIRouter(prefix="/api/chat", tags=["Chat"])
 
 class MessageCreate(BaseModel):
     content: str
