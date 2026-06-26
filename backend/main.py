@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.auth import router as auth_router
@@ -5,7 +8,7 @@ from api.chat import router as chat_router
 
 app = FastAPI(
     title="AI Chatbot API",
-    description="Service Layer 구조로 리팩토링된 AI 챗봇 백엔드",
+    description="AI 챗봇 백엔드",
     version="1.0.0"
 )
 
