@@ -27,7 +27,8 @@ class AuthService:
 
     @staticmethod
     def authenticate_user(db: Session, user_data):
-        user = db.query(User).filter(User.email == user_data.email).first()
+        email = getattr(user_data, "email", None) or getattr(user_data, "username", None)
+        user = db.query(User).filter(User.email == email).first()
         
         if not user or not verify_password(user_data.password, user.hashed_password):
             raise HTTPException(
