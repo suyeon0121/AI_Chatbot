@@ -10,5 +10,5 @@ class UserLogin(BaseModel):
     password: str = Field(..., description="사용자 비밀번호")
 
 class Token(BaseModel):
-    accsee_token: str = Field(..., description="JWT 액세스 토큰 문자열")
+    access_token: str = Field(..., description="JWT 액세스 토큰 문자열")
     token_type: str = Field("bearer", description="토큰 타입 (기본값: bearer)")
