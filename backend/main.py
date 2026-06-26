@@ -1,4 +1,3 @@
-import models
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -8,6 +7,7 @@ from api.auth import router as auth_router
 from api.chat import router as chat_router
 from db.session import engine
 from models.user import User, Base
+from models.chat import ChatRoom
 
 Base.metadata.create_all(bind=engine)
 
