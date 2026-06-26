@@ -5,6 +5,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.auth import router as auth_router
 from api.chat import router as chat_router
+from db.session import engine
+from models.user import User, Base
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="AI Chatbot API",
