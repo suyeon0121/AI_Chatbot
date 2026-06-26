@@ -4,6 +4,7 @@ from db.session import get_db
 from core.security import get_current_user_email
 from pydantic import BaseModel
 from services.chat import ChatService
+import models
 
 router = APIRouter(prefix="/api/chat", tags=["Chat"])
 

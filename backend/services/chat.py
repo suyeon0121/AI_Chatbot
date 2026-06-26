@@ -2,8 +2,7 @@ import os
 from sqlalchemy.orm import Session
 from openai import OpenAI
 from fastapi import HTTPException, status
-from models.user import User
-from models.chat import ChatRoom, ChatMessage
+from models import ChatRoom, User
 
 openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
