@@ -1,8 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.orm import relationship
-
-from models import Base
+from models.base import Base
 
 class ChatRoom(Base):
     __tablename__ = "chat_rooms"
