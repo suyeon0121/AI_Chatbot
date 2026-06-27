@@ -7,7 +7,7 @@ from models import Base
 class ChatRoom(Base):
     __tablename__ = "chat_rooms"
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(255), default="새로운 대화", nullable=False)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     user = relationship("User", back_populates="chat_rooms")
