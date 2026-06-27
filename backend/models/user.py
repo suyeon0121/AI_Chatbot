@@ -1,8 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from sqlalchemy.orm import declarative_base
-
-Base = declarative_base()
+from sqlalchemy.orm import relationship
+from models import Base
 
 class User(Base):
     __tablename__ = "users"
@@ -14,6 +13,7 @@ class User(Base):
 
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    chat_rooms = relationship("ChatRoom", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}', nickname='{self.nickname}')>"
