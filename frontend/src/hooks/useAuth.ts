@@ -1,9 +1,35 @@
 import { useCallback, useMemo, useState } from 'react';
 import * as authService from '../services/authService';
-import type { LoginRequest, RegisterRequest } from '../types/auth';
+import { ACCESS_TOKEN_STORAGE_KEY } from '../services/apiClient';
+import type { AuthResponse, LoginRequest, RegisterRequest, User } from '../types/auth';
 
-export function useAuth() {
-  const [accessToken, setAccessToken] = useState(() => localStorage.getItem('accessToken'));
+interface UseAuthResult {
+  accessToken: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (payload: LoginRequest) => Promise<AuthResponse>;
+  logout: () => void;
+  register: (payload: RegisterRequest) => Promise<User>;
+}
+
+function getStoredAccessToken(): string | null {
+  try {
+    return localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function setStoredAccessToken(token: string): void {
+  localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
+}
+
+function removeStoredAccessToken(): void {
+  localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+}
+
+export function useAuth(): UseAuthResult {
+  const [accessToken, setAccessToken] = useState<string | null>(() => getStoredAccessToken());
   const [isLoading, setIsLoading] = useState(false);
 
   const isAuthenticated = useMemo(() => Boolean(accessToken), [accessToken]);
@@ -12,7 +38,7 @@ export function useAuth() {
     setIsLoading(true);
     try {
       const response = await authService.login(payload);
-      localStorage.setItem('accessToken', response.access_token);
+      setStoredAccessToken(response.access_token);
       setAccessToken(response.access_token);
       return response;
     } finally {
@@ -30,7 +56,7 @@ export function useAuth() {
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('accessToken');
+    removeStoredAccessToken();
     setAccessToken(null);
   }, []);
 

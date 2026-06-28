@@ -1,30 +1,35 @@
 import ChatInput from '../components/chat/ChatInput';
 import MessageList from '../components/chat/MessageList';
 import Sidebar from '../components/layout/Sidebar';
-import { useChat } from '../hooks/useChat';
+import type { ChatRoom, Message } from '../types/chat';
+
+const emptyRooms: ChatRoom[] = [];
+const emptyMessages: Message[] = [];
+
+function createRoom(): Promise<void> {
+  return Promise.resolve();
+}
+
+function selectRoom(): void {
+  return undefined;
+}
+
+function sendMessage(): Promise<void> {
+  return Promise.resolve();
+}
 
 function ChatPage() {
-  const {
-    activeRoomId,
-    createRoom,
-    isLoading,
-    messages,
-    rooms,
-    sendMessage,
-    setActiveRoomId,
-  } = useChat();
-
   return (
     <main className="chat-page">
       <Sidebar
-        activeRoomId={activeRoomId}
+        activeRoomId={null}
         onCreateRoom={createRoom}
-        onSelectRoom={setActiveRoomId}
-        rooms={rooms}
+        onSelectRoom={selectRoom}
+        rooms={emptyRooms}
       />
       <section className="chat-panel">
-        <MessageList messages={messages} />
-        <ChatInput disabled={isLoading || !activeRoomId} onSend={sendMessage} />
+        <MessageList messages={emptyMessages} />
+        <ChatInput disabled onSend={sendMessage} />
       </section>
     </main>
   );
