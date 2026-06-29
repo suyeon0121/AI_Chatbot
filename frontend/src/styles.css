@@ -84,8 +84,44 @@ a {
   border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
+  justify-content: space-between; /* 상단 내용과 하단 버튼을 양 끝으로 배치 */
   gap: 16px;
   padding: 20px;
+}
+
+/* 상단 영역 내부 컴포넌트(버튼과 리스트) 사이의 간격 */
+.sidebar-top {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 하단 버튼들을 가로로 나란히 배치 */
+.sidebar-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+/* 로그인 & 설정 버튼을 이쁜 다크 모드 버튼 스타일로 변경 */
+.sidebar-action-btn {
+  flex: 1;
+  background: #111827;
+  color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font: inherit;
+  cursor: pointer;
+  min-height: 42px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.sidebar-action-btn:hover {
+  opacity: 0.9;
 }
 
 .room-list {
