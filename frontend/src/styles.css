@@ -1,44 +1,92 @@
-/* 전역 스타일 초기화 및 레이아웃 */
-html, body, #root {
+* {
+  box-sizing: border-box;
+}
+
+body {
   margin: 0;
-  padding: 0;
-  height: 100%;
+  background: #f6f7f9;
+  color: #1f2937;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 a {
-  color: inherit;
+  color: #2563eb;
 }
 
 .button,
 .input,
-.room,
-.sidebar-action {
+.room {
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font: inherit;
 }
 
-/* 🟢 FIX: 메인 레이아웃을 가로 플렉스로 정렬하고 화면 전체를 채웁니다 */
-.chat-page {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
+.button {
+  background: #111827;
+  color: white;
+  cursor: pointer;
+  min-height: 42px;
+  padding: 0 16px;
 }
 
-/* 🟢 FIX: 사이드바 너비를 고정하고 내부 요소를 수직 정렬합니다 */
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.input {
+  background: white;
+  min-height: 42px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+.spinner {
+  animation: spin 0.8s linear infinite;
+  border: 3px solid #d1d5db;
+  border-top-color: #111827;
+  border-radius: 50%;
+  height: 28px;
+  width: 28px;
+}
+
+.auth-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+}
+
+.auth-form {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  max-width: 380px;
+  padding: 28px;
+  width: 100%;
+}
+
+.auth-form h1 {
+  font-size: 24px;
+  margin: 0 0 8px;
+}
+
+.chat-page {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+
 .sidebar {
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
   justify-content: space-between; /* 상단 내용과 하단 버튼을 양 끝으로 배치 */
   gap: 16px;
   padding: 20px;
-  width: 260px;
-  min-width: 260px;
-  height: 100%;
-  box-sizing: border-box;
-  border-right: 1px solid #e5e7eb;
-  background-color: #f9fafb;
 }
 
 /* 상단 영역 내부 컴포넌트(버튼과 리스트) 사이의 간격 */
@@ -77,72 +125,102 @@ a {
 }
 
 .room-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 8px;
-  overflow-y: auto;
-  flex: 1;
 }
 
 .room {
-  background: transparent;
-  text-align: left;
-  padding: 10px;
+  background: #ffffff;
   cursor: pointer;
+  min-height: 40px;
+  overflow: hidden;
+  padding: 0 12px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .room.active {
-  background: #e0e7ff;
+  background: #eef2ff;
   border-color: #6366f1;
 }
 
-/* 🟢 로그인, 설정 버튼이 무조건 최하단에 위치하게 만듭니다 */
-.sidebar-actions {
-  display: grid;
-  gap: 8px;
-  margin-top: auto;
-}
-
-.sidebar-action {
-  align-items: center;
-  background: #ffffff;
-  color: #374151;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  min-height: 40px;
-  padding: 0 12px;
-  text-decoration: none;
-}
-
-.sidebar-action:hover {
-  background: #f5f7fa;
-  border-color: #9ca3af;
-}
-
-/* 🟢 FIX: 오른쪽 채팅창이 나머지 화면을 모두 차지하도록 설정 */
 .chat-panel {
   display: grid;
   grid-template-rows: 1fr auto;
-  flex: 1;
-  height: 100%;
+  min-width: 0;
 }
 
-/* 반응형 모바일 스타일 */
-@media (max-width: 768px) {
+.message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.message {
+  max-width: min(720px, 80%);
+}
+
+.message span {
+  color: #6b7280;
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.message p {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  white-space: pre-wrap;
+}
+
+.message-user {
+  align-self: flex-end;
+}
+
+.message-user p {
+  background: #dcfce7;
+  border-color: #bbf7d0;
+}
+
+.empty-state {
+  color: #6b7280;
+  display: grid;
+  min-height: 100%;
+  place-items: center;
+}
+
+.chat-input {
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr auto;
+  padding: 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 720px) {
   .chat-page {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .sidebar {
-    width: 100%;
-    min-width: 100%;
-    height: auto;
     border-bottom: 1px solid #e5e7eb;
     border-right: 0;
   }
 
   .chat-input {
-    padding: 10px;
+    grid-template-columns: 1fr;
   }
 }
