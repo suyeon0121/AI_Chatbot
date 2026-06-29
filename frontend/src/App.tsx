@@ -5,12 +5,14 @@ import RegisterPage from './pages/RegisterPage';
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/chat" replace />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/chat" element={<ChatPage />} />
-    </Routes>
+    <div className="app-container">
+      <Routes>
+        <Route path="/" element={<Navigate to="/chat" replace />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/chat" element={<ChatPage />} />
+      </Routes>
+    </div>
   );
 }
 
