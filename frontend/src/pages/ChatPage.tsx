@@ -20,14 +20,14 @@ function sendMessage(): Promise<void> {
 
 function ChatPage() {
   return (
-    <main className="chat-page">
+    <main className="flex h-screen w-screen bg-white text-gray-800 font-sans overflow-hidden">
       <Sidebar
         activeRoomId={null}
         onCreateRoom={createRoom}
         onSelectRoom={selectRoom}
         rooms={emptyRooms}
       />
-      <section className="chat-panel">
+      <section className="flex-1 flex flex-col h-full relative overflow-hidden">
         <MessageList messages={emptyMessages} />
         <ChatInput disabled onSend={sendMessage} />
       </section>
