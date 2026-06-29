@@ -2,3 +2,10 @@
 __pycache__/
 node_modules/
 .venv/
+
+# 테스트 코드 제외 설정
+*.test.tsx
+*.test.ts
+*.spec.tsx
+*.spec.ts
+**/__tests__/
