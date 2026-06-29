@@ -1,6 +1,4 @@
 import { FormEvent, useState } from 'react';
-import Button from '../common/Button';
-import Input from '../common/Input';
 
 interface ChatInputProps {
   disabled?: boolean;
@@ -12,35 +10,56 @@ function ChatInput({ disabled = false, onSend }: ChatInputProps) {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
     const trimmedMessage = message.trim();
-    if (!trimmedMessage) {
-      return;
-    }
+    if (!trimmedMessage) return;
 
     await onSend(trimmedMessage);
     setMessage('');
   };
 
   return (
-    <form className="w-full border-t border-gray-200 p-4 bg-white" onSubmit={handleSubmit}>
-      <div className="max-w-4xl mx-auto flex gap-2 w-full items-center">
-        <div className="flex-1">
-          <Input
-            disabled={disabled}
-            onChange={(event) => setMessage(event.target.value)}
-            placeholder="메시지를 입력하세요"
-            value={message}
-            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-black text-sm"
-          />
-        </div>
-        <Button 
+    <form 
+      onSubmit={handleSubmit}
+      style={{
+        width: '100%',
+        borderTop: '1px solid #e5e7eb',
+        padding: '16px',
+        backgroundColor: '#ffffff',
+        boxSizing: 'border-box'
+      }}
+    >
+      <div style={{ maxWidth: '896px', margin: '0 auto', display: 'flex', gap: '8px', width: '100%' }}>
+        <input
+          disabled={disabled}
+          onChange={(event) => setMessage(event.target.value)}
+          placeholder="메시지를 입력하세요"
+          value={message}
+          style={{
+            flex: 1,
+            border: '1px solid #d1d5db',
+            borderRadius: '6px',
+            padding: '10px 16px',
+            fontSize: '14px',
+            outline: 'none',
+            boxSizing: 'border-box'
+          }}
+        />
+        <button 
           disabled={disabled || !message.trim()} 
           type="submit"
-          className="bg-gray-800 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-black transition-colors disabled:bg-gray-200 disabled:text-gray-400"
+          style={{
+            backgroundColor: message.trim() ? '#1f2937' : '#e5e7eb',
+            color: message.trim() ? '#ffffff' : '#9ca3af',
+            padding: '10px 20px',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            border: 'none',
+            cursor: message.trim() ? 'pointer' : 'default'
+          }}
         >
           전송
-        </Button>
+        </button>
       </div>
     </form>
   );
