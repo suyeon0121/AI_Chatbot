@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import Button from '../common/Button';
 import type { ChatRoom } from '../../types/chat';
 
 interface SidebarProps {
@@ -11,30 +10,56 @@ interface SidebarProps {
 
 function Sidebar({ activeRoomId, onCreateRoom, onSelectRoom, rooms }: SidebarProps) {
   return (
-    <aside className="w-60 bg-gray-50 border-r border-gray-200 p-3 flex flex-col justify-between h-full select-none">
-      {/* 상단 그룹: 새 대화 생성 버튼 및 채팅방 리스트 영역 */}
-      <div className="flex flex-col gap-3 overflow-hidden">
-        <div className="w-full text-center">
-          <Button 
-            onClick={onCreateRoom} 
-            type="button"
-            className="w-full bg-black text-white py-1.5 px-3 rounded-md text-xs font-medium hover:bg-gray-800 transition-colors"
-          >
-            새 대화
-          </Button>
-        </div>
+    <aside 
+      style={{
+        width: '240px',
+        backgroundColor: '#f9fafb',
+        borderRight: '1px solid #e5e7eb',
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'between',
+        height: '100%',
+        boxSizing: 'border-box'
+      }}
+    >
+      {/* 상단 그룹 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+        <button 
+          onClick={onCreateRoom} 
+          type="button"
+          style={{
+            width: '105px',
+            backgroundColor: '#000000',
+            color: '#ffffff',
+            padding: '6px 12px',
+            borderRadius: '6px',
+            fontSize: '13px',
+            fontWeight: '500',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          새 대화
+        </button>
         
-        <nav className="flex flex-col gap-1 overflow-y-auto max-h-[calc(100vh-180px)]">
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto' }}>
           {rooms.map((room) => (
             <button
               key={room.id}
-              className={`w-full text-left px-2.5 py-1.5 rounded-md text-xs transition-colors truncate ${
-                room.id.toString() === activeRoomId
-                  ? 'bg-gray-200 text-gray-900 font-semibold'
-                  : 'text-gray-600 hover:bg-gray-100'
-              }`}
               onClick={() => onSelectRoom(room.id.toString())}
               type="button"
+              style={{
+                width: '100%',
+                textAlign: 'left',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                fontSize: '13px',
+                border: 'none',
+                backgroundColor: room.id.toString() === activeRoomId ? '#e5e7eb' : 'transparent',
+                color: room.id.toString() === activeRoomId ? '#111827' : '#4b5563',
+                cursor: 'pointer'
+              }}
             >
               {room.title}
             </button>
@@ -42,17 +67,41 @@ function Sidebar({ activeRoomId, onCreateRoom, onSelectRoom, rooms }: SidebarPro
         </nav>
       </div>
 
-      {/* 하단 그룹: 로그인 및 설정 고정 버튼 영역 */}
-      <div className="flex flex-col gap-1.5 border-t border-gray-200 pt-3">
+      {/* 하단 그룹 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid #e5e7eb', paddingTop: '12px' }}>
         <Link
-          className="w-full text-center border border-gray-300 bg-white py-1.5 px-3 rounded-md text-xs text-gray-600 font-medium hover:bg-gray-50 transition-colors block"
           to="/login"
+          style={{
+            width: '100%',
+            textAlign: 'center',
+            border: '1px solid #d1d5db',
+            backgroundColor: '#ffffff',
+            padding: '6px 12px',
+            borderRadius: '6px',
+            fontSize: '13px',
+            color: '#374151',
+            textDecoration: 'none',
+            fontWeight: '500',
+            boxSizing: 'border-box',
+            display: 'block'
+          }}
         >
           로그인
         </Link>
         <button
-          className="w-full text-center border border-gray-300 bg-white py-1.5 px-3 rounded-md text-xs text-gray-600 font-medium hover:bg-gray-50 transition-colors"
           type="button"
+          style={{
+            width: '100%',
+            textAlign: 'center',
+            border: '1px solid #d1d5db',
+            backgroundColor: '#ffffff',
+            padding: '6px 12px',
+            borderRadius: '6px',
+            fontSize: '13px',
+            color: '#374151',
+            fontWeight: '500',
+            cursor: 'pointer'
+          }}
         >
           설정
         </button>
