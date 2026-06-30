@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useChat } from '../hooks/useChat'; // 고도화한 useChat 훅 import
 
 function ChatPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   // 1. 커스텀 훅에서 필요한 모든 상태와 액션 가져오기
   const {
@@ -38,7 +38,9 @@ function ChatPage() {
       {/* 3. 사이드바 연결 */}
       <Sidebar
         activeRoomId={activeRoomId ? activeRoomId.toString() : null}
+        isAuthenticated={isAuthenticated}
         isCreateRoomDisabled={!isAuthenticated || isCreatingRoom}
+        onLogout={logout}
         onCreateRoom={createRoom}
         onSelectRoom={(id) => selectRoom(Number(id))} // string을 다시 number로 변환하여 훅에 전달
         rooms={rooms}
