@@ -19,6 +19,10 @@ interface UseChatResult {
   sendMessage: (content: string) => Promise<void>;
 }
 
+interface UseChatOptions {
+  enabled?: boolean;
+}
+
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return '알 수 없는 오류가 발생했습니다.';
@@ -39,7 +43,7 @@ function createLocalMessage(
   };
 }
 
-export function useChat(): UseChatResult {
+export function useChat({ enabled = true }: UseChatOptions = {}): UseChatResult {
   const [activeRoomId, setActiveRoomId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
@@ -48,6 +52,7 @@ export function useChat(): UseChatResult {
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [messagesByRoomId, setMessagesByRoomId] = useState<Record<number, Message[]>>({});
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
+  const loadedMessageRoomIds = useRef<Set<number>>(new Set());
   const localMessageId = useRef(-1);
 
   const activeRoom = useMemo(
@@ -71,6 +76,12 @@ export function useChat(): UseChatResult {
   }, []);
 
   const loadRooms = useCallback(async () => {
+    if (!enabled) {
+      setRooms([]);
+      setActiveRoomId(null);
+      return [];
+    }
+
     setIsLoadingRooms(true);
     setError(null);
     try {
@@ -89,12 +100,15 @@ export function useChat(): UseChatResult {
     } finally {
       setIsLoadingRooms(false);
     }
-  }, []);
+  }, [enabled]);
 
   // 2. 특정 방의 내역을 불러오는 함수 분리 및 고도화
   const loadMessagesOfRoom = useCallback(async (roomId: number) => {
-    // 이미 메모리에 캐싱되어 있다면 불필요한 API 호출 방지 (선택적 최적화 가능)
-    if (messagesByRoomId[roomId]?.length > 0) return;
+    if (loadedMessageRoomIds.current.has(roomId)) {
+      return;
+    }
+
+    loadedMessageRoomIds.current.add(roomId);
 
     setIsLoadingMessages(true);
     setError(null);
@@ -106,13 +120,20 @@ export function useChat(): UseChatResult {
         [roomId]: history,
       }));
     } catch (caughtError) {
+      loadedMessageRoomIds.current.delete(roomId);
       setError(getErrorMessage(caughtError));
     } finally {
       setIsLoadingMessages(false);
     }
-  }, [messagesByRoomId]);
+  }, []);
 
   const createRoom = useCallback(async () => {
+    if (!enabled) {
+      const authError = new Error('로그인이 필요합니다.');
+      setError(authError.message);
+      throw authError;
+    }
+
     setIsCreatingRoom(true);
     setError(null);
     try {
@@ -122,6 +143,7 @@ export function useChat(): UseChatResult {
         ...currentRooms.filter((room) => room.id !== createdRoom.id),
       ]);
       setActiveRoomId(createdRoom.id);
+      loadedMessageRoomIds.current.add(createdRoom.id);
       setMessagesByRoomId((currentMessages) => ({
         ...currentMessages,
         [createdRoom.id]: [],
@@ -133,7 +155,7 @@ export function useChat(): UseChatResult {
     } finally {
       setIsCreatingRoom(false);
     }
-  }, []);
+  }, [enabled]);
 
   const selectRoom = useCallback((roomId: number) => {
     setActiveRoomId(roomId);
@@ -149,7 +171,13 @@ export function useChat(): UseChatResult {
   const sendMessage = useCallback(
     async (content: string) => {
       const trimmedContent = content.trim();
-      if (!trimmedContent || activeRoomId === null) return;
+      if (!trimmedContent) return;
+
+      if (activeRoomId === null) {
+        const noRoomError = new Error('채팅방을 먼저 선택해주세요.');
+        setError(noRoomError.message);
+        throw noRoomError;
+      }
 
       const tempUserMessageId = nextLocalMessageId();
       const userMessage = createLocalMessage(
@@ -210,8 +238,18 @@ export function useChat(): UseChatResult {
   );
 
   useEffect(() => {
+    if (!enabled) {
+      setRooms([]);
+      setActiveRoomId(null);
+      setMessagesByRoomId({});
+      loadedMessageRoomIds.current.clear();
+      setIsLoadingRooms(false);
+      setIsLoadingMessages(false);
+      return;
+    }
+
     void loadRooms().catch(() => undefined);
-  }, [loadRooms]);
+  }, [enabled, loadRooms]);
 
   return {
     activeRoom,
