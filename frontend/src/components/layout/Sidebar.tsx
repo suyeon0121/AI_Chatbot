@@ -4,16 +4,25 @@ import type { ChatRoom } from '../../types/chat';
 
 interface SidebarProps {
   activeRoomId: string | null;
+  isCreateRoomDisabled?: boolean;
   onCreateRoom: () => void;
   onSelectRoom: (roomId: string) => void;
   rooms: ChatRoom[];
 }
 
-function Sidebar({ rooms, onCreateRoom, onSelectRoom, activeRoomId }: SidebarProps) {
+function Sidebar({
+  rooms,
+  onCreateRoom,
+  onSelectRoom,
+  activeRoomId,
+  isCreateRoomDisabled = false,
+}: SidebarProps) {
   return (
     <aside className="sidebar">
       <div className="sidebar-top">
-        <Button onClick={onCreateRoom}>새 대화</Button>
+        <Button disabled={isCreateRoomDisabled} onClick={onCreateRoom}>
+          새 대화
+        </Button>
         
         <nav className="room-list">
           {rooms.map(room => (

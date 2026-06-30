@@ -18,6 +18,22 @@ function removeStoredAccessToken(): void {
   }
 }
 
+function getServerErrorMessage(data: unknown): string | null {
+  if (typeof data !== 'object' || data === null) {
+    return null;
+  }
+
+  if ('detail' in data && typeof data.detail === 'string') {
+    return data.detail;
+  }
+
+  if ('message' in data && typeof data.message === 'string') {
+    return data.message;
+  }
+
+  return null;
+}
+
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000',
   timeout: 10000, // 1. 네트워크 타임아웃 설정 (10초) 추가
@@ -53,9 +69,10 @@ apiClient.interceptors.response.use(
     // 2xx 외의 상태 코드가 오거나 네트워크 에러 시 이 함수가 실행됩니다.
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
+      const serverMessage = getServerErrorMessage(error.response?.data);
 
       // 3. 토큰 만료 또는 유효하지 않은 인증 (401 Unauthorized) 집중 처리
-      if (status === 401) {
+      if (status === 401 || (status === 404 && serverMessage === '사용자를 찾을 수 없습니다.')) {
         console.warn('인증 토큰이 만료되었거나 유효하지 않습니다. 세션을 초기화합니다.');
         
         // 브라우저에 남은 유효하지 않은 토큰을 지우고 로그인 페이지로 튕겨내기
@@ -70,7 +87,6 @@ apiClient.interceptors.response.use(
       }
       
       // 서버에서 내려준 커스텀 에러 메시지가 있다면 Error 객체에 주입해 서브 레이어로 전달
-      const serverMessage = error.response?.data?.message;
       if (serverMessage) {
         error.message = serverMessage;
       }
