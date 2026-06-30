@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as chatService from '../services/chatService';
 import type { ChatRoom, Message } from '../types/chat';
 
+const ACTIVE_CHAT_ROOM_STORAGE_KEY = 'activeChatRoomId';
+
 interface UseChatResult {
   activeRoom: ChatRoom | null;
   activeRoomId: number | null;
@@ -26,6 +28,36 @@ interface UseChatOptions {
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return '알 수 없는 오류가 발생했습니다.';
+}
+
+function getStoredActiveRoomId(): number | null {
+  try {
+    const storedRoomId = localStorage.getItem(ACTIVE_CHAT_ROOM_STORAGE_KEY);
+    if (storedRoomId === null) {
+      return null;
+    }
+
+    const parsedRoomId = Number(storedRoomId);
+    return Number.isInteger(parsedRoomId) ? parsedRoomId : null;
+  } catch {
+    return null;
+  }
+}
+
+function setStoredActiveRoomId(roomId: number): void {
+  try {
+    localStorage.setItem(ACTIVE_CHAT_ROOM_STORAGE_KEY, String(roomId));
+  } catch {
+    return;
+  }
+}
+
+function removeStoredActiveRoomId(): void {
+  try {
+    localStorage.removeItem(ACTIVE_CHAT_ROOM_STORAGE_KEY);
+  } catch {
+    return;
+  }
 }
 
 function createLocalMessage(
@@ -88,9 +120,16 @@ export function useChat({ enabled = true }: UseChatOptions = {}): UseChatResult 
       const loadedRooms = await chatService.getChatRooms();
       setRooms(loadedRooms);
       setActiveRoomId((currentRoomId) => {
+        const storedRoomId = getStoredActiveRoomId();
+
+        if (storedRoomId !== null && loadedRooms.some((room) => room.id === storedRoomId)) {
+          return storedRoomId;
+        }
+
         if (currentRoomId !== null && loadedRooms.some((room) => room.id === currentRoomId)) {
           return currentRoomId;
         }
+
         return loadedRooms[0]?.id ?? null;
       });
       return loadedRooms;
@@ -143,6 +182,7 @@ export function useChat({ enabled = true }: UseChatOptions = {}): UseChatResult 
         ...currentRooms.filter((room) => room.id !== createdRoom.id),
       ]);
       setActiveRoomId(createdRoom.id);
+      setStoredActiveRoomId(createdRoom.id);
       loadedMessageRoomIds.current.add(createdRoom.id);
       setMessagesByRoomId((currentMessages) => ({
         ...currentMessages,
@@ -159,6 +199,11 @@ export function useChat({ enabled = true }: UseChatOptions = {}): UseChatResult 
 
   const selectRoom = useCallback((roomId: number) => {
     setActiveRoomId(roomId);
+    setStoredActiveRoomId(roomId);
+    setMessagesByRoomId((currentMessages) => ({
+      ...currentMessages,
+      [roomId]: currentMessages[roomId] ?? [],
+    }));
   }, []);
 
   // 3. activeRoomId가 바뀔 때마다 해당 방의 대화 내역 자동 로드
@@ -242,6 +287,7 @@ export function useChat({ enabled = true }: UseChatOptions = {}): UseChatResult 
       setRooms([]);
       setActiveRoomId(null);
       setMessagesByRoomId({});
+      removeStoredActiveRoomId();
       loadedMessageRoomIds.current.clear();
       setIsLoadingRooms(false);
       setIsLoadingMessages(false);

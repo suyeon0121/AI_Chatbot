@@ -10,6 +10,7 @@ function ChatPage() {
 
   // 1. 커스텀 훅에서 필요한 모든 상태와 액션 가져오기
   const {
+    activeRoom,
     activeRoomId,
     rooms,
     messages,
@@ -54,6 +55,13 @@ function ChatPage() {
           </div>
         ) : (
           <>
+            <header className="chat-room-header">
+              <div>
+                <p className="chat-room-label">대화창</p>
+                <h1>{activeRoom?.title ?? '대화를 선택해주세요'}</h1>
+              </div>
+            </header>
+
             {/* 메시지 리스트 영역 */}
             <div className="chat-messages">
               {isLoadingMessages ? (
