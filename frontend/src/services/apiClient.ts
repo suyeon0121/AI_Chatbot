@@ -4,7 +4,8 @@ export const ACCESS_TOKEN_STORAGE_KEY = 'accessToken';
 
 function getStoredAccessToken(): string | null {
   try {
-    return localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+    localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+    return sessionStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   } catch {
     return null;
   }
@@ -13,6 +14,7 @@ function getStoredAccessToken(): string | null {
 function removeStoredAccessToken(): void {
   try {
     localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+    sessionStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
   } catch (error) {
     console.error('토큰 제거 실패:', error);
   }

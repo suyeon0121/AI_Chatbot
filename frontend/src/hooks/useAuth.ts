@@ -14,7 +14,8 @@ interface UseAuthResult {
 
 function getStoredAccessToken(): string | null {
   try {
-    return localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+    localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+    return sessionStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
   } catch {
     return null;
   }
@@ -22,7 +23,8 @@ function getStoredAccessToken(): string | null {
 
 function setStoredAccessToken(token: string): void {
   try {
-    localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
+    localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+    sessionStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
   } catch (error) {
     console.error('토큰 저장 실패 (LocalStorage 용량 초과 등):', error);
   }
@@ -31,6 +33,7 @@ function setStoredAccessToken(token: string): void {
 function removeStoredAccessToken(): void {
   try {
     localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+    sessionStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
   } catch (error) {
     console.error('토큰 삭제 실패:', error);
   }
