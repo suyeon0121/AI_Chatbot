@@ -24,8 +24,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router)
-app.include_router(chat_router)
+# 프론트엔드 URL 체계(/api/auth, /api/chat)와 일치하도록 prefix 추가
+app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
+app.include_router(chat_router, prefix="/api/chat", tags=["Chat"])
 
 @app.get("/")
 def read_root():
