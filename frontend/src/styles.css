@@ -7,6 +7,7 @@ body {
   background: #f6f7f9;
   color: #1f2937;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  overflow: hidden; /* 브라우저 전체 스크롤 방지 */
 }
 
 a {
@@ -27,6 +28,18 @@ a {
   cursor: pointer;
   min-height: 42px;
   padding: 0 16px;
+  transition: background 0.2s, transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button:hover:not(:disabled) {
+  background: #1f2937;
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .button:disabled {
@@ -42,14 +55,30 @@ a {
 }
 
 .spinner {
-  animation: spin 0.8s linear infinite;
-  border: 3px solid #d1d5db;
-  border-top-color: #111827;
+  display: inline-block;
+  border: 2px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
-  height: 28px;
-  width: 28px;
+  animation: spin 0.8s linear infinite;
 }
 
+/* 크기(Size) 분기 */
+.spinner-sm { width: 16px; height: 16px; border-width: 2px; }
+.spinner-md { width: 32px; height: 32px; border-width: 3px; }
+.spinner-lg { width: 48px; height: 48px; border-width: 4px; }
+
+/* 색상(Color) 분기 */
+.spinner-primary { border-top-color: #0070f3; } /* 서비스 메인 컬러 */
+.spinner-white { border-top-color: #ffffff; border-color: rgba(255, 255, 255, 0.2); }
+.spinner-gray { border-top-color: #666666; }
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Auth Pages (Login / Register)
+   ========================================================================== */
 .auth-page {
   display: grid;
   min-height: 100vh;
@@ -73,10 +102,15 @@ a {
   margin: 0 0 8px;
 }
 
+/* ==========================================================================
+   Chat Layout (Main Architecture)
+   ========================================================================== */
 .chat-page {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  min-height: 100vh;
+  grid-template-columns: 280px 1fr; /* 좌측 사이드바 고정, 우측 패널 유연하게 확장 */
+  height: 100vh; 
+  width: 100vw;
+  overflow: hidden;
 }
 
 .sidebar {
@@ -84,86 +118,99 @@ a {
   border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* 상단 내용과 하단 버튼을 양 끝으로 배치 */
   gap: 16px;
   padding: 20px;
+  height: 100%; /* 대화창 높이 전체 채움 */
+  overflow: hidden;
 }
 
-/* 상단 영역 내부 컴포넌트(버튼과 리스트) 사이의 간격 */
 .sidebar-top {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-/* 하단 버튼들을 가로로 나란히 배치 */
-/* 사이드바 하단 버튼들을 위한 스타일 추가 */
-.sidebar-footer-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: auto;
-  justify-content: center;
-}
-
-.sidebar-footer-btn {
-  width: 70px;
-  min-height: 30px;
-  padding: 0 8px;
-  font-size: 13px;
-  background: white;
-  color: #111827;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-}
-
-.sidebar-action-btn:hover {
-  opacity: 0.9;
+  flex: 1;
+  overflow: hidden; /* 내부 리스트 스크롤을 위해 가려줌 */
 }
 
 .room-list {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 8px;
+  overflow-y: auto; /* 대화방 목록이 많아지면 사이드바 내부에서만 스크롤 */
+  flex: 1;
 }
 
 .room {
   background: #ffffff;
   cursor: pointer;
   min-height: 40px;
-  overflow: hidden;
-  padding: 0 12px;
+  padding: 10px 12px;
   text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
+  overflow: hidden;
+  width: 100%;
 }
 
 .room.active {
   background: #eef2ff;
   border-color: #6366f1;
+  font-weight: 600;
 }
 
+.sidebar-footer-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.button.sidebar-footer-btn {
+  flex: 1;
+  min-height: 36px;
+  padding: 0 8px;
+  font-size: 13px;
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  text-decoration: none;
+}
+
+.button.sidebar-footer-btn:hover {
+  background: #f9fafb;
+}
+
+/* ==========================================================================
+   Chat Panel & Messages Area
+   ========================================================================== */
 .chat-panel {
-  display: grid;
-  grid-template-rows: 1fr auto;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
   min-width: 0;
+  position: relative; /* Empty state 절대 좌표 기준점 */
+  background: #f6f7f9; 
 }
 
 .message-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
+  gap: 16px;
+  overflow-y: auto; /* 메시지가 길어지면 이 영역만 스크롤 */
   padding: 24px;
+  flex: 1;          
 }
 
 .message {
   max-width: min(720px, 80%);
+  display: flex;
+  flex-direction: column;
 }
 
 .message span {
   color: #6b7280;
-  display: block;
   font-size: 13px;
   margin-bottom: 4px;
 }
@@ -175,10 +222,16 @@ a {
   margin: 0;
   padding: 12px 14px;
   white-space: pre-wrap;
+  word-break: break-word; /* 띄어쓰기 없는 긴 텍스트 터짐 방지 */
+  line-height: 1.5;
 }
 
 .message-user {
   align-self: flex-end;
+}
+
+.message-user span {
+  align-self: flex-end; /* '나' 텍스트 우측 정렬 */
 }
 
 .message-user p {
@@ -188,37 +241,40 @@ a {
 
 .empty-state {
   color: #6b7280;
-  display: grid;
-  min-height: 100%;
-  place-items: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 15px;
+  margin: 0;
+  pointer-events: none; 
 }
 
 .chat-input {
   background: white;
   border-top: 1px solid #e5e7eb;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 1fr auto;
   padding: 16px;
+  width: 100%;
+  /* position: absolute 제거 -> Flex 흐름에 의해서 최하단에 자연스럽게 배치됨 */
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
+/* ==========================================================================
+   Responsive (Mobile Support)
+   ========================================================================== */
 @media (max-width: 720px) {
   .chat-page {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr; /* 모바일에서는 위아래 스택 구조 */
+    height: 100vh;
   }
 
   .sidebar {
     border-bottom: 1px solid #e5e7eb;
     border-right: 0;
+    height: 200px; /* 모바일 사이드바 높이 제한 */
   }
 
-  .chat-input {
-    grid-template-columns: 1fr;
+  .chat-panel {
+    height: calc(100vh - 200px); /* 전체에서 모바일 사이드바 높이를 뺀 나머지 고정 */
   }
 }
