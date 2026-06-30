@@ -192,6 +192,52 @@ a {
   min-width: 0;
   position: relative; /* Empty state 절대 좌표 기준점 */
   background: #f6f7f9; 
+  overflow: hidden;
+}
+
+.chat-loading {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+}
+
+.chat-messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  position: relative;
+}
+
+.chat-message-loading {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.5);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1;
+}
+
+.chat-room-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  padding: 18px 24px;
+}
+
+.chat-room-header h1 {
+  font-size: 20px;
+  margin: 2px 0 0;
+}
+
+.chat-room-label {
+  color: #6b7280;
+  font-size: 13px;
+  margin: 0;
 }
 
 .message-list {
@@ -256,6 +302,12 @@ a {
   padding: 16px;
   width: 100%;
   /* position: absolute 제거 -> Flex 흐름에 의해서 최하단에 자연스럽게 배치됨 */
+}
+
+.chat-input-panel {
+  background: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  flex-shrink: 0;
 }
 
 /* ==========================================================================
