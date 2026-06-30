@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { Message } from '../../types/chat';
 
 interface MessageListProps {
@@ -5,35 +6,40 @@ interface MessageListProps {
 }
 
 function MessageList({ messages }: MessageListProps) {
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  // 새로운 메시지가 추가되면 자동으로 최하단으로 스크롤 이동
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   if (messages.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center text-gray-400 font-medium text-sm select-none">
+      <div className="empty-state" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#888' }}>
         아직 메시지가 없습니다.
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4 w-full max-w-3xl mx-auto flex flex-col">
+    <div className="message-list" style={{ overflowY: 'auto', height: '100%', padding: '16px' }}>
       {messages.map((message) => (
         <article 
-          className={`flex flex-col gap-1 max-w-[80%] ${
-            message.sender_type === 'user' ? 'self-end items-end' : 'self-start items-start'
-          }`} 
+          className={`message ${message.sender_type === 'user' ? 'message-user' : ''}`} 
           key={message.id}
+          style={{ marginBottom: '12px' }}
         >
-          <span className="text-xs text-gray-400 font-medium px-1">
+          <span style={{ fontWeight: 'bold', display: 'block', marginBottom: '4px' }}>
             {message.sender_type === 'user' ? '나' : 'AI'}
           </span>
-          <p className={`p-3 rounded-lg text-sm ${
-            message.sender_type === 'user' 
-              ? 'bg-black text-white rounded-tr-none' 
-              : 'bg-gray-100 text-gray-800 rounded-tl-none'
-          }`}>
+          {/* whiteSpace 지정을 통해 줄바꿈(\n)이 화면에 그대로 표시되도록 설정 */}
+          <p style={{ whiteSpace: 'pre-wrap', margin: 0, wordBreak: 'break-word' }}>
             {message.content}
           </p>
         </article>
       ))}
+      {/* 스크롤 위치를 잡기 위한 더미 div */}
+      <div ref={bottomRef} />
     </div>
   );
 }

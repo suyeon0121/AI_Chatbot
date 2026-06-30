@@ -7,58 +7,45 @@ interface ChatInputProps {
 
 function ChatInput({ disabled = false, onSend }: ChatInputProps) {
   const [message, setMessage] = useState('');
+  const [isSending, setIsSending] = useState(false); // 메시지 전송 중 로딩 상태 추가
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmedMessage = message.trim();
-    if (!trimmedMessage) return;
+    
+    // 이미 전송 중이거나 메시지가 비어있다면 실행 방지
+    if (!trimmedMessage || isSending || disabled) return;
 
-    await onSend(trimmedMessage);
-    setMessage('');
+    try {
+      setIsSending(true);
+      await onSend(trimmedMessage);
+      setMessage(''); // 전송 성공 시에만 입력창 초기화
+    } catch (error) {
+      console.error('메시지 전송 실패:', error);
+      // 필요에 따라 사용자에게 에러 알림(Toast 등)을 띄울 수 있습니다.
+    } finally {
+      setIsSending(false);
+    }
   };
 
+  const isInputDisabled = disabled || isSending;
+
   return (
-    <form 
-      onSubmit={handleSubmit}
-      style={{
-        width: '100%',
-        borderTop: '1px solid #e5e7eb',
-        padding: '16px',
-        backgroundColor: '#ffffff',
-        boxSizing: 'border-box'
-      }}
-    >
-      <div style={{ maxWidth: '896px', margin: '0 auto', display: 'flex', gap: '8px', width: '100%' }}>
+    <form onSubmit={handleSubmit} className="chat-input">
+      <div style={{ maxWidth: '896px', margin: '0 auto', display: 'flex', gap: '8px', width: '100%', alignItems: 'center' }}>
         <input
-          disabled={disabled}
+          disabled={isInputDisabled}
           onChange={(event) => setMessage(event.target.value)}
-          placeholder="메시지를 입력하세요"
+          placeholder={isSending ? "메시지를 보내는 중..." : "메시지를 입력하세요"}
           value={message}
-          style={{
-            flex: 1,
-            border: '1px solid #d1d5db',
-            borderRadius: '6px',
-            padding: '10px 16px',
-            fontSize: '14px',
-            outline: 'none',
-            boxSizing: 'border-box'
-          }}
+          className="input" 
         />
         <button 
-          disabled={disabled || !message.trim()} 
+          disabled={isInputDisabled || !message.trim()} // 빈 메시지일 때 버튼 비활성화
           type="submit"
-          style={{
-            backgroundColor: message.trim() ? '#1f2937' : '#e5e7eb',
-            color: message.trim() ? '#ffffff' : '#9ca3af',
-            padding: '10px 20px',
-            borderRadius: '6px',
-            fontSize: '14px',
-            fontWeight: '500',
-            border: 'none',
-            cursor: message.trim() ? 'pointer' : 'default'
-          }}
+          className="button" 
         >
-          전송
+          {isSending ? "전송 중..." : "전송"}
         </button>
       </div>
     </form>

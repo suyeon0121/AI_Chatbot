@@ -9,39 +9,30 @@ interface SidebarProps {
   rooms: ChatRoom[];
 }
 
-function Sidebar({ activeRoomId, onCreateRoom, onSelectRoom, rooms }: SidebarProps) {
+function Sidebar({ rooms, onCreateRoom, onSelectRoom, activeRoomId }: SidebarProps) {
   return (
     <aside className="sidebar">
-      <Button onClick={onCreateRoom} type="button">
-        새 대화
-      </Button>
-      <nav className="room-list">
-        {rooms.map((room) => (
-          <button
-            key={room.id}
-            className={`room ${room.id.toString() === activeRoomId ? 'active' : ''}`}
-            onClick={() => onSelectRoom(room.id.toString())}
-            type="button"
-          >
-            {room.title}
-          </button>
-        ))}
-      </nav>
+      <div className="sidebar-top">
+        <Button onClick={onCreateRoom}>새 대화</Button>
+        
+        <nav className="room-list">
+          {rooms.map(room => (
+            <button 
+              key={room.id} 
+              className={`room ${room.id.toString() === activeRoomId ? 'active' : ''}`}
+              onClick={() => onSelectRoom(room.id.toString())}
+            >
+              {room.title}
+            </button>
+          ))}
+        </nav>
+      </div>
 
-      <div className="sidebar-actions sidebar-footer-actions">
-        <Link 
-          className="button sidebar-action sidebar-footer-btn" 
-          to="/login">
-          로그인
-        </Link>
-        <button 
-          className="button sidebar-action sidebar-footer-btn" 
-          type="button">
-          설정
-        </button>
+      <div className="sidebar-footer-actions">
+        <Link to="/login" className="button sidebar-footer-btn">로그인</Link>
+        <Button className="sidebar-footer-btn">설정</Button>
       </div>
     </aside>
   );
 }
-
 export default Sidebar;

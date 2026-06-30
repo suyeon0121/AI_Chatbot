@@ -10,6 +10,7 @@ interface UseChatResult {
   error: string | null;
   isCreatingRoom: boolean;
   isLoadingRooms: boolean;
+  isLoadingMessages: boolean; // 1. 메시지 로딩 상태 추가
   isSendingMessage: boolean;
   loadRooms: () => Promise<ChatRoom[]>;
   messages: Message[];
@@ -19,10 +20,7 @@ interface UseChatResult {
 }
 
 function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-
+  if (error instanceof Error) return error.message;
   return '알 수 없는 오류가 발생했습니다.';
 }
 
@@ -46,6 +44,7 @@ export function useChat(): UseChatResult {
   const [error, setError] = useState<string | null>(null);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
   const [isLoadingRooms, setIsLoadingRooms] = useState(false);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false); // 메시지 로딩 상태
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [messagesByRoomId, setMessagesByRoomId] = useState<Record<number, Message[]>>({});
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
@@ -57,10 +56,7 @@ export function useChat(): UseChatResult {
   );
 
   const messages = useMemo(() => {
-    if (activeRoomId === null) {
-      return [];
-    }
-
+    if (activeRoomId === null) return [];
     return messagesByRoomId[activeRoomId] ?? [];
   }, [activeRoomId, messagesByRoomId]);
 
@@ -77,7 +73,6 @@ export function useChat(): UseChatResult {
   const loadRooms = useCallback(async () => {
     setIsLoadingRooms(true);
     setError(null);
-
     try {
       const loadedRooms = await chatService.getChatRooms();
       setRooms(loadedRooms);
@@ -85,10 +80,8 @@ export function useChat(): UseChatResult {
         if (currentRoomId !== null && loadedRooms.some((room) => room.id === currentRoomId)) {
           return currentRoomId;
         }
-
         return loadedRooms[0]?.id ?? null;
       });
-
       return loadedRooms;
     } catch (caughtError) {
       setError(getErrorMessage(caughtError));
@@ -98,10 +91,30 @@ export function useChat(): UseChatResult {
     }
   }, []);
 
+  // 2. 특정 방의 내역을 불러오는 함수 분리 및 고도화
+  const loadMessagesOfRoom = useCallback(async (roomId: number) => {
+    // 이미 메모리에 캐싱되어 있다면 불필요한 API 호출 방지 (선택적 최적화 가능)
+    if (messagesByRoomId[roomId]?.length > 0) return;
+
+    setIsLoadingMessages(true);
+    setError(null);
+    try {
+      // API 명세에 따라 적절한 메서드(예: chatService.getMessages(roomId))가 있다고 가정합니다.
+      const history = await chatService.getChatRoomMessages(roomId); 
+      setMessagesByRoomId((currentMessages) => ({
+        ...currentMessages,
+        [roomId]: history,
+      }));
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError));
+    } finally {
+      setIsLoadingMessages(false);
+    }
+  }, [messagesByRoomId]);
+
   const createRoom = useCallback(async () => {
     setIsCreatingRoom(true);
     setError(null);
-
     try {
       const createdRoom = await chatService.createChatRoom();
       setRooms((currentRooms) => [
@@ -111,9 +124,8 @@ export function useChat(): UseChatResult {
       setActiveRoomId(createdRoom.id);
       setMessagesByRoomId((currentMessages) => ({
         ...currentMessages,
-        [createdRoom.id]: currentMessages[createdRoom.id] ?? [],
+        [createdRoom.id]: [],
       }));
-
       return createdRoom;
     } catch (caughtError) {
       setError(getErrorMessage(caughtError));
@@ -125,33 +137,29 @@ export function useChat(): UseChatResult {
 
   const selectRoom = useCallback((roomId: number) => {
     setActiveRoomId(roomId);
-    setMessagesByRoomId((currentMessages) => ({
-      ...currentMessages,
-      [roomId]: currentMessages[roomId] ?? [],
-    }));
   }, []);
+
+  // 3. activeRoomId가 바뀔 때마다 해당 방의 대화 내역 자동 로드
+  useEffect(() => {
+    if (activeRoomId !== null) {
+      void loadMessagesOfRoom(activeRoomId);
+    }
+  }, [activeRoomId, loadMessagesOfRoom]);
 
   const sendMessage = useCallback(
     async (content: string) => {
       const trimmedContent = content.trim();
+      if (!trimmedContent || activeRoomId === null) return;
 
-      if (!trimmedContent) {
-        return;
-      }
-
-      if (activeRoomId === null) {
-        const noRoomError = new Error('채팅방을 먼저 선택해주세요.');
-        setError(noRoomError.message);
-        throw noRoomError;
-      }
-
+      const tempUserMessageId = nextLocalMessageId();
       const userMessage = createLocalMessage(
-        nextLocalMessageId(),
+        tempUserMessageId,
         activeRoomId,
         'user',
         trimmedContent,
       );
 
+      // UI에 유저가 보낸 메시지 낙관적 선반영
       setMessagesByRoomId((currentMessages) => ({
         ...currentMessages,
         [activeRoomId]: [...(currentMessages[activeRoomId] ?? []), userMessage],
@@ -161,18 +169,37 @@ export function useChat(): UseChatResult {
 
       try {
         const response = await chatService.sendMessage(activeRoomId, { content: trimmedContent });
+        
+        // AI 답변 메시지 객체 생성 (실제 서버 응답 데이터 바인딩)
         const assistantMessage = createLocalMessage(
-          nextLocalMessageId(),
+          response.assistant_message?.id ?? nextLocalMessageId(), // ◀ 이렇게 수정!
           activeRoomId,
           'assistant',
           response.answer,
         );
 
+        setMessagesByRoomId((currentMessages) => {
+          const currentRoomMessages = currentMessages[activeRoomId] ?? [];
+          
+          // 4. 동기화 핵심: 임시 아이디로 박아둔 유저 대화 정보를 서버가 가공한 실제 데이터(id 등)로 치환
+          const syncedUserMessages = currentRoomMessages.map((msg) => {
+            if (msg.id === tempUserMessageId && response.user_message) {
+              return response.user_message; // 서버 응답에 담긴 정제된 유저 메시지 객체로 변경
+            }
+            return msg;
+          });
+
+          return {
+            ...currentMessages,
+            [activeRoomId]: [...syncedUserMessages, assistantMessage],
+          };
+        });
+      } catch (caughtError) {
+        // 5. 전송 에러 시 낙관적 업데이트 롤백 처리
         setMessagesByRoomId((currentMessages) => ({
           ...currentMessages,
-          [activeRoomId]: [...(currentMessages[activeRoomId] ?? []), assistantMessage],
+          [activeRoomId]: (currentMessages[activeRoomId] ?? []).filter((msg) => msg.id !== tempUserMessageId),
         }));
-      } catch (caughtError) {
         setError(getErrorMessage(caughtError));
         throw caughtError;
       } finally {
@@ -194,6 +221,7 @@ export function useChat(): UseChatResult {
     error,
     isCreatingRoom,
     isLoadingRooms,
+    isLoadingMessages,
     isSendingMessage,
     loadRooms,
     messages,
