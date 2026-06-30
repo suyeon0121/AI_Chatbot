@@ -6,7 +6,7 @@ import apiClient from './apiClient';
  */
 export async function createChatRoom(): Promise<ChatRoom> {
   try {
-    const { data } = await apiClient.post<ChatRoom>('/api/chat/room');
+    const { data } = await apiClient.post<ChatRoom>('/api/chat/rooms');
     return data;
   } catch (error) {
     console.error('chatService.createChatRoom 실패:', error);
