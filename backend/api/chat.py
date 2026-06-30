@@ -26,3 +26,8 @@ def send_chat_message(room_id: int, message_data: MessageCreate, db: Session = D
 @router.get("/{room_id}/messages")
 def get_chat_room_messages(room_id: int, db: Session = Depends(get_db), current_user_email: str = Depends(get_current_user_email)):
     return ChatService.get_room_messages(db, room_id, current_user_email)
+
+@router.delete("/{room_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_chat_room(room_id: int, db: Session = Depends(get_db), current_user_email: str = Depends(get_current_user_email)):
+    ChatService.delete_room(db, room_id, current_user_email)
+    return None

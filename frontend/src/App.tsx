@@ -41,8 +41,8 @@ function App() {
   return (
     <div className="app-container">
       <Routes>
-        {/* 루트 경로 진입 시 기본 리다이렉트 */}
-        <Route path="/" element={<Navigate to="/chat" replace />} />
+        {/* 첫 진입 시 로그인 화면을 먼저 보여줍니다. */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
         {/* 비인증 유저 전용 라우트 (이미 로그인한 사람은 접근 불가) */}
         <Route 

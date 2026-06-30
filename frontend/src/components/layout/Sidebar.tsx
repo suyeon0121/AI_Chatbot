@@ -6,6 +6,7 @@ interface SidebarProps {
   activeRoomId: string | null;
   isCreateRoomDisabled?: boolean;
   onCreateRoom: () => void;
+  onDeleteRoom: (roomId: string) => void;
   onSelectRoom: (roomId: string) => void;
   rooms: ChatRoom[];
 }
@@ -13,6 +14,7 @@ interface SidebarProps {
 function Sidebar({
   rooms,
   onCreateRoom,
+  onDeleteRoom,
   onSelectRoom,
   activeRoomId,
   isCreateRoomDisabled = false,
@@ -26,13 +28,26 @@ function Sidebar({
         
         <nav className="room-list">
           {rooms.map(room => (
-            <button 
-              key={room.id} 
-              className={`room ${room.id.toString() === activeRoomId ? 'active' : ''}`}
-              onClick={() => onSelectRoom(room.id.toString())}
+            <div
+              className={`room-row ${room.id.toString() === activeRoomId ? 'active' : ''}`}
+              key={room.id}
             >
-              {room.title}
-            </button>
+              <button
+                className="room"
+                onClick={() => onSelectRoom(room.id.toString())}
+                type="button"
+              >
+                {room.title}
+              </button>
+              <button
+                aria-label={`${room.title} 삭제`}
+                className="room-delete"
+                onClick={() => onDeleteRoom(room.id.toString())}
+                type="button"
+              >
+                🗑
+              </button>
+            </div>
           ))}
         </nav>
       </div>

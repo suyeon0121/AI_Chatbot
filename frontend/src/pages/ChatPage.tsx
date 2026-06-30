@@ -19,6 +19,7 @@ function ChatPage() {
     isCreatingRoom,
     isSendingMessage,
     createRoom,
+    deleteRoom,
     selectRoom,
     sendMessage,
     error,
@@ -40,6 +41,7 @@ function ChatPage() {
         activeRoomId={activeRoomId ? activeRoomId.toString() : null}
         isCreateRoomDisabled={!isAuthenticated || isCreatingRoom}
         onCreateRoom={createRoom}
+        onDeleteRoom={(id) => deleteRoom(Number(id))}
         onSelectRoom={(id) => selectRoom(Number(id))} // string을 다시 number로 변환하여 훅에 전달
         rooms={rooms}
       />

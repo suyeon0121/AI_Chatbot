@@ -9,6 +9,7 @@ interface UseChatResult {
   activeRoomId: number | null;
   clearError: () => void;
   createRoom: () => Promise<ChatRoom>;
+  deleteRoom: (roomId: number) => Promise<void>;
   error: string | null;
   isCreatingRoom: boolean;
   isLoadingRooms: boolean;
@@ -197,6 +198,45 @@ export function useChat({ enabled = true }: UseChatOptions = {}): UseChatResult 
     }
   }, [enabled]);
 
+  const deleteRoom = useCallback(async (roomId: number) => {
+    setError(null);
+
+    try {
+      await chatService.deleteChatRoom(roomId);
+      loadedMessageRoomIds.current.delete(roomId);
+
+      setMessagesByRoomId((currentMessages) => {
+        const nextMessages = { ...currentMessages };
+        delete nextMessages[roomId];
+        return nextMessages;
+      });
+
+      setRooms((currentRooms) => {
+        const nextRooms = currentRooms.filter((room) => room.id !== roomId);
+
+        setActiveRoomId((currentRoomId) => {
+          if (currentRoomId !== roomId) {
+            return currentRoomId;
+          }
+
+          const nextActiveRoomId = nextRooms[0]?.id ?? null;
+          if (nextActiveRoomId === null) {
+            removeStoredActiveRoomId();
+            return null;
+          }
+
+          setStoredActiveRoomId(nextActiveRoomId);
+          return nextActiveRoomId;
+        });
+
+        return nextRooms;
+      });
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError));
+      throw caughtError;
+    }
+  }, []);
+
   const selectRoom = useCallback((roomId: number) => {
     setActiveRoomId(roomId);
     setStoredActiveRoomId(roomId);
@@ -302,6 +342,7 @@ export function useChat({ enabled = true }: UseChatOptions = {}): UseChatResult 
     activeRoomId,
     clearError,
     createRoom,
+    deleteRoom,
     error,
     isCreatingRoom,
     isLoadingRooms,

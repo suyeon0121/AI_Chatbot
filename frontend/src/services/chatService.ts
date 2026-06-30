@@ -41,6 +41,15 @@ export async function getChatRoomMessages(roomId: number): Promise<Message[]> {
   }
 }
 
+export async function deleteChatRoom(roomId: number): Promise<void> {
+  try {
+    await apiClient.delete(`/api/chat/${roomId}`);
+  } catch (error) {
+    console.error(`chatService.deleteChatRoom 실패 (roomId: ${roomId}):`, error);
+    throw error;
+  }
+}
+
 /**
  * 선택된 채팅방에 메시지를 전송하고 AI의 답변을 받아옵니다.
  */
