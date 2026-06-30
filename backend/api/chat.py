@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from services.chat import ChatService
 import models
 
-router = APIRouter(prefix="/api/chat", tags=["Chat"])
+router = APIRouter(tags=["Chat"])
 
 class MessageCreate(BaseModel):
     content: str
